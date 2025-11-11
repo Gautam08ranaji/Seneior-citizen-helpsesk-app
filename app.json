@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "FieldTrackApp",
-    "slug": "FieldTrackingApp",
+    "name": "Seneior Citizen helpdesk App",
+    "slug": "seneior-citizen-helpdesk-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/appIcon1.png",
-    "scheme": "fieldtrackingapp",
+    "scheme": "seneiorcitizenhelpdeskapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "android": {
@@ -23,14 +23,15 @@
           "apiKey": "AIzaSyCs-N8XxSQWIfllyifIcpNLKANPTWnd2jk"
         }
       },
-      "package": "com.anonymous.FieldTrackingApp"
+      "package": "com.gautamranaji.seneiorcitizenhelpdeskapp"
     },
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "We need your location to show the route on map.",
         "NSLocationAlwaysUsageDescription": "We need your location to show the route even when app is in background."
-      }
+      },
+      "bundleIdentifier": "com.gautamranaji.seneiorcitizenhelpdeskapp"
     },
     "web": {
       "bundler": "metro",
@@ -57,8 +58,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "8293a5a0-5ca9-4e32-85ac-2e767af8c0a0"
+        "projectId": "b8057c07-23d1-4321-945e-1376e7872686"
       }
-    }
+    },
+    "owner": "gautam1008"
   }
 }

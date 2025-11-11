@@ -1,4 +1,4 @@
-package com.anonymous.FieldTrackingApp
+package com.gautamranaji.seneiorcitizenhelpdeskapp
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
