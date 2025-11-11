@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "redux",
+			"path": "../../StreansDigital/FieldTrackingApp/redux"
+		},
+		{
+			"name": "FieldTrackingApp",
+			"path": ".."
+		}
+	],
+	"settings": {}
+}
