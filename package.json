@@ -1,5 +1,5 @@
 {
-"name": "seneior-citizen-helpdesk-app",
+  "name": "seneior-citizen-helpdesk-app",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -29,6 +29,7 @@
     "expo-blur": "~14.1.5",
     "expo-camera": "~16.1.11",
     "expo-constants": "~17.1.7",
+    "expo-device": "~7.1.4",
     "expo-document-picker": "~13.1.6",
     "expo-face-detector": "^13.0.2",
     "expo-file-system": "~18.1.11",
@@ -47,6 +48,7 @@
     "expo-print": "~14.1.4",
     "expo-router": "5.1.4",
     "expo-sharing": "~13.1.5",
+    "expo-sms": "~13.1.4",
     "expo-splash-screen": "~0.30.10",
     "expo-status-bar": "~2.2.3",
     "expo-symbols": "~0.4.5",
@@ -75,6 +77,7 @@
     "react-native-material-symbols": "^0.0.1",
     "react-native-modal": "^14.0.0-rc.1",
     "react-native-modal-datetime-picker": "^18.0.0",
+    "react-native-otp-textinput": "^1.1.7",
     "react-native-pager-view": "^6.8.1",
     "react-native-paper": "^5.14.5",
     "react-native-pdf": "^6.7.7",

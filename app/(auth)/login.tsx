@@ -1,10 +1,8 @@
 import LangSelect from "@/components/onboarding/LangSelect";
-import { RootState } from "@/redux/store";
-import apiClient from "@/services/api/axiosInstance";
 import { useAppTheme } from "@/theme/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Animated,
@@ -23,8 +21,6 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { useDispatch, useSelector } from "react-redux";
-import { setUser } from "../../redux/slices/userSlice";
 
 const { width, height } = Dimensions.get("window");
 
@@ -34,16 +30,14 @@ export default function App() {
 
 function LoginScreen() {
   const insets = useSafeAreaInsets();
-  const dispatch = useDispatch();
-  const user = useSelector((state: RootState) => state.user);
   const { theme } = useAppTheme();
-  const { t } = useTranslation(); // ✅ hook ensures reactive language changes
+  const { t } = useTranslation();
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isFirstTime, setIsFirstTime] = useState(false); // ✅ track first-time login
 
   const phoneContainerHeight = height * 0.62;
 
@@ -66,91 +60,27 @@ function LoginScreen() {
     ]).start();
   }, []);
 
-  useEffect(() => {
-    if (user?.token) router.replace("/(tabs)");
-  }, [user]);
-
-  /** ------------------ LOGIN HANDLER ------------------ */
-  const handleLogin = useCallback(async () => {
-    if (!email.trim() || !password) {
-      setErrorMsg(t("LoginScreen.enterEmailPassword", "Please enter Email and Password"));
+  // ------------------ LOGIN HANDLER ------------------
+  const handleLogin = () => {
+    if (!email.trim()) {
+      setErrorMsg(t("LoginScreen.enterEmail", "Please enter your Email ID"));
       return;
     }
 
-    setLoading(true);
-    setErrorMsg(null);
-    try {
-      const { data } = await apiClient.post(
-        "/ValidateLogin",
-        new URLSearchParams({
-          strLoginId: email,
-          strPwd: password,
-          szDeviceType: Platform.OS === "ios" ? "iOS" : "Android",
-        }),
-        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-      );
+    // 👇 Simulated logic — in real case, check API if account exists
+    const accountExists = false; // simulate “not found” for now
 
-      let raw = typeof data === "string" ? data : JSON.stringify(data);
-      let parsed: any = null;
-
-      try {
-        parsed = JSON.parse(raw);
-      } catch {
-        const parts = raw
-          .split(/}\s*{/)
-          .map((p, i, arr) =>
-            i < arr.length - 1 ? (i === 0 ? p + "}" : "{" + p + "}") : "{" + p
-          );
-        for (const p of parts) {
-          try {
-            const obj = JSON.parse(p);
-            if (obj.StatusMessage || obj.Status) {
-              parsed = obj;
-              break;
-            }
-          } catch {
-            continue;
-          }
-        }
-      }
-
-      if (!parsed) {
-        setErrorMsg(t("LoginScreen.unexpectedError", "Unexpected error, please try again."));
-        return;
-      }
-
-      const statusMessage = (parsed.StatusMessage || parsed.Status || "").replace(/"/g, "");
-      if (statusMessage === "Login Success") {
-        const info = parsed.LoginInforamtion?.[0];
-        dispatch(
-          setUser({
-            name: info.contact_full_name,
-            email: info.contact_emailid,
-            token: info.APIKEY,
-            id: info.contact_id,
-            role: info.contact_role,
-            loginId: info.contact_login_id,
-            phone: info.contact_phone,
-            mobileEnabled: info.conttact_mobile_enable,
-            enabled: info.contact_enabled,
-            VehicleNo: info.VehicleNo,
-            AccountId: info.AccountId,
-            AccountName: info.AccountName,
-          })
-        );
-        router.replace("/(tabs)");
-      } else {
-        setErrorMsg(statusMessage || t("LoginScreen.unexpectedError", "Login failed."));
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      setErrorMsg(t("LoginScreen.unableToLogin", "Unable to login. Please try again."));
-    } finally {
-      setLoading(false);
+    if (!accountExists) {
+      setIsFirstTime(true);
+      router.push({
+        pathname: "/otpVerification",
+        params: { email },
+      });
+      return;
     }
-  }, [email, password, dispatch, t]);
 
-  if (user?.token) return null;
+    console.log("Proceed to dashboard for existing user");
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background.screen }]}>
@@ -243,6 +173,7 @@ function LoginScreen() {
               {t("LoginScreen.welcome", "Welcome back!")}
             </Text>
 
+            {/* Email Field */}
             <TextInput
               style={[
                 styles.input,
@@ -259,56 +190,83 @@ function LoginScreen() {
               autoCapitalize="none"
             />
 
-            <View style={{ position: "relative" }}>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    borderColor: theme.background.screen,
-                    backgroundColor: theme.button.primary.bg,
-                    color: theme.background.screen,
-                  },
-                ]}
-                placeholder={t("LoginScreen.password", "Password")}
-                placeholderTextColor={theme.background.screen}
-                secureTextEntry={!showPassword}
-                value={password}
-                onChangeText={setPassword}
-              />
-              <TouchableOpacity
-                onPress={() => setShowPassword((prev) => !prev)}
-                style={{
-                  position: "absolute",
-                  right: 10,
-                  top: "25%",
-                }}
-              >
-                <Ionicons
-                  name={showPassword ? "eye-off" : "eye"}
-                  size={22}
-                  color={theme.background.screen}
+            {/* Password Field — hidden if first-time */}
+            {!isFirstTime && (
+              <View style={{ position: "relative" }}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      borderColor: theme.background.screen,
+                      backgroundColor: theme.button.primary.bg,
+                      color: theme.background.screen,
+                    },
+                  ]}
+                  placeholder={t("LoginScreen.password", "Password")}
+                  placeholderTextColor={theme.background.screen}
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={setPassword}
                 />
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity
+                  onPress={() => setShowPassword((prev) => !prev)}
+                  style={{
+                    position: "absolute",
+                    right: 10,
+                    top: "25%",
+                  }}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={22}
+                    color={theme.background.screen}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
 
             {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
 
-            <TouchableOpacity style={styles.forgotContainer} 
-            onPress={()=>{
-              router.push('/(auth)/forgot')
-            }}
-            >
-              <Text style={[styles.forgotText, { color: theme.background.screen }]}>
-                {t("LoginScreen.forgotPassword", "Forgot Password?")}
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.forgotContainer}>
+              <TouchableOpacity
+                onPress={() => {
+                  router.push("/register");
+                }}
+              >
+                <Text
+                  style={[
+                    styles.forgotText,
+                    { color: theme.background.screen },
+                  ]}
+                >
+                  {t("LoginScreen.signUp")}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  router.push("/(auth)/forgot");
+                }}
+              >
+                <Text
+                  style={[
+                    styles.forgotText,
+                    { color: theme.background.screen },
+                  ]}
+                >
+                  {t("LoginScreen.forgotPassword", "Forgot Password?")}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
             <TouchableOpacity
               style={[styles.loginButton, { backgroundColor: theme.background.screen }]}
               onPress={handleLogin}
             >
               <Text style={[styles.loginButtonText, { color: theme.button.primary.bg }]}>
-                {t("LoginScreen.login", "Log In")}
+                {isFirstTime
+                  ? t("LoginScreen.continue", "Continue")
+                  : t("LoginScreen.login", "Log In")}
               </Text>
             </TouchableOpacity>
           </Animated.View>
@@ -319,18 +277,19 @@ function LoginScreen() {
 }
 
 // ------------------- Styles -------------------
+const { width: w, height: h } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: { flex: 1 },
   mainContainer: { flex: 1, position: "relative" },
   topTextContainer: {
-    marginTop: height * 0.04,
+    marginTop: h * 0.04,
     alignItems: "center",
-    paddingHorizontal: width * 0.06,
+    paddingHorizontal: w * 0.06,
   },
   topText: {
-    fontSize: width * 0.045,
+    fontSize: w * 0.045,
     textAlign: "center",
-    marginVertical: height * 0.005,
+    marginVertical: h * 0.005,
   },
   phoneContainer: { justifyContent: "flex-end", alignItems: "center", position: "relative" },
   phoneImage: { height: "100%" },
@@ -338,19 +297,67 @@ const styles = StyleSheet.create({
   loginContainer: {
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    paddingHorizontal: width * 0.06,
-    paddingTop: height * 0.025,
+    paddingHorizontal: w * 0.06,
+    paddingTop: h * 0.025,
     justifyContent: "center",
   },
-  welcomeText: { fontSize: width * 0.055, fontWeight: "bold", marginBottom: height * 0.03, textAlign: "center" },
-  input: { borderRadius: 10, padding: height * 0.015, color: "#FFFFFF", marginBottom: height * 0.015, borderWidth: 1 },
-  errorText: { color: "red", marginBottom: height * 0.01, fontSize: width * 0.035, textAlign: "left" },
-  forgotContainer: { alignSelf: "flex-end", marginBottom: height * 0.02 },
-  forgotText: { fontSize: width * 0.035 },
-  loginButton: { paddingVertical: height * 0.018, borderRadius: 10, marginTop: height * 0.01 },
-  loginButtonText: { textAlign: "center", fontWeight: "bold", fontSize: width * 0.045 },
-  RightMarkerInsidePhoneFemale: { position: "absolute", width: width * 0.35, height: height * 0.13, top: height * 0.03, left: height * 0.2, borderRadius: 15 },
-  leftMarkerInsidePhone: { position: "absolute", width: width * 0.35, height: height * 0.16, top: height * 0.16, borderRadius: 15 },
-  RightMarkerInsidePhoneFemale1: { position: "absolute", width: width * 0.35, height: height * 0.23, top: height * 0.16, left: height * 0.03 },
+  welcomeText: {
+    fontSize: w * 0.055,
+    fontWeight: "bold",
+    marginBottom: h * 0.03,
+    textAlign: "center",
+  },
+  input: {
+    borderRadius: 10,
+    padding: h * 0.015,
+    color: "#FFFFFF",
+    marginBottom: h * 0.015,
+    borderWidth: 1,
+  },
+  errorText: {
+    color: "red",
+    marginBottom: h * 0.01,
+    fontSize: w * 0.035,
+    textAlign: "left",
+  },
+  forgotContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: h * 0.02,
+    gap: 10,
+  },
+  forgotText: { fontSize: w * 0.035 },
+  loginButton: {
+    paddingVertical: h * 0.018,
+    borderRadius: 10,
+    marginTop: h * 0.01,
+  },
+  loginButtonText: {
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: w * 0.045,
+  },
+  RightMarkerInsidePhoneFemale: {
+    position: "absolute",
+    width: w * 0.35,
+    height: h * 0.13,
+    top: h * 0.03,
+    left: h * 0.2,
+    borderRadius: 15,
+  },
+  leftMarkerInsidePhone: {
+    position: "absolute",
+    width: w * 0.35,
+    height: h * 0.16,
+    top: h * 0.16,
+    borderRadius: 15,
+  },
+  RightMarkerInsidePhoneFemale1: {
+    position: "absolute",
+    width: w * 0.35,
+    height: h * 0.23,
+    top: h * 0.16,
+    left: h * 0.03,
+  },
   marker: { position: "absolute" },
 });

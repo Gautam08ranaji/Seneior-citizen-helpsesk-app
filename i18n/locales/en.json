@@ -25,7 +25,7 @@
     "forgotPassword": "Forgot Password?",
     "login": "Log in",
     "noAccount": "Don’t have an account?",
-    "signUp": "Sign Up",
+    "signUp": "Sign Up?",
     "loginFailed": "Login Failed",
     "unexpectedError": "Unexpected response",
     "error": "Error",
@@ -33,12 +33,10 @@
     "email": "Email",
     "password": "Password"
   },
-  "WelcomeScreen": {
-    "title": "Seneior citizen helpdesk app",
-    "tagline": "Track, manage, and optimize your field activities with ease.",
-    "button": "WELCOME",
-    "noAccount": "DON’T HAVE AN ACCOUNT?",
-    "register": "REGISTER"
+ "WelcomeScreen": {
+    "title": "Elder Helpline – 14567",
+    "tagline": "Connecting senior citizens and caregivers with quick help and local support.",
+    "button": "Continue"
   },
  
   "HomeScreen": {
@@ -368,5 +366,11 @@
     "handoverImageAdded": "Handover image added.",
     "success": "Success",
     "handoverSaved": "Handover log saved. Check console for data."
+  },
+  "LanguageScreen": {
+    "title": "Select Your Language",
+    "subtitle": "Choose the language you’re comfortable with",
+    "continue": "Save & Continue",
+    "loading": "Saving..."
   }
 }

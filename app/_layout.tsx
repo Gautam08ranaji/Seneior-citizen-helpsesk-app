@@ -8,7 +8,7 @@ import 'react-native-reanimated';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ThemeType } from '../theme/Colors'; // ✅ Correct import
+import { ThemeType } from '../theme/Colors';
 import { ThemeProvider as AppThemeProvider, useAppTheme } from '../theme/ThemeContext';
 
 import { Provider } from 'react-redux';
@@ -16,14 +16,13 @@ import { PersistGate } from 'redux-persist/integration/react';
 import store, { persistor } from '../redux/store';
 
 import { CameraPermissionProvider } from '@/context/CameraPermissionProvider';
-import AuthGate from '../components/AuthGate';
 import { LocationProvider } from '../hooks/LocationContext';
 
 import { I18nextProvider } from 'react-i18next';
 import { MD3DarkTheme, MD3LightTheme, Provider as PaperProvider } from 'react-native-paper';
 import i18n from '../i18n';
 
-// --- Mapper to convert your ThemeType to Paper theme ---
+// --- Convert ThemeType to Paper theme ---
 function mapThemeToPaper(theme: ThemeType, mode: 'light' | 'dark') {
   const baseTheme = mode === 'dark' ? MD3DarkTheme : MD3LightTheme;
 
@@ -38,22 +37,15 @@ function mapThemeToPaper(theme: ThemeType, mode: 'light' | 'dark') {
       error: theme.status?.error ?? '#B00020',
       onSurface: theme.text.primary,
       onBackground: theme.text.primary,
-      // You can map additional colors here if needed
     },
   };
 }
 
 export default function RootLayout() {
   const [loaded] = useFonts({
-    "SFProDisplay-BlackItalic": require("../assets/fonts/sf-pro-display/SFProDisplay-BlackItalic.otf"),
     "SFProDisplay-Bold": require("../assets/fonts/sf-pro-display/SFProDisplay-Bold.otf"),
-    "SFProDisplay-HeavyItalic": require("../assets/fonts/sf-pro-display/SFProDisplay-HeavyItalic.otf"),
-    "SFProDisplay-LightItalic": require("../assets/fonts/sf-pro-display/SFProDisplay-LightItalic.otf"),
     "SFProDisplay-Medium": require("../assets/fonts/sf-pro-display/SFProDisplay-Medium.otf"),
     "SFProDisplay-Regular": require("../assets/fonts/sf-pro-display/SFProDisplay-Regular.otf"),
-    "SFProDisplay-SemiBoldItalic": require("../assets/fonts/sf-pro-display/SFProDisplay-SemiBoldItalic.otf"),
-    "SFProDisplay-ThinItalic": require("../assets/fonts/sf-pro-display/SFProDisplay-ThinItalic.otf"),
-    "SFProDisplay-UltraLightItalic": require("../assets/fonts/sf-pro-display/SFProDisplay-UltraLightItalic.otf"),
   });
 
   if (!loaded) return null;
@@ -88,15 +80,14 @@ function ThemedNavigation() {
           <View style={{ height: RNStatusBar.currentHeight, backgroundColor: theme.button.primary.bg }} />
         )}
         <View style={{ flex: 1, backgroundColor: theme.background.screen }}>
-          <AuthGate>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: theme.background.screen },
-              }}
-            />
-            <StatusBar translucent style={mode === 'dark' ? 'light' : 'light'} />
-          </AuthGate>
+          {/* 🚫 Removed AuthGate — direct access to routes */}
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: theme.background.screen },
+            }}
+          />
+          <StatusBar translucent style={mode === 'dark' ? 'light' : 'light'} />
         </View>
       </SafeAreaProvider>
     </PaperProvider>
